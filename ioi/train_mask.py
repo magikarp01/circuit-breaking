@@ -17,11 +17,11 @@ from eval import evaluate_model
 from data import batch_text_to_tokens
 import plotly.express as px
 # %%
-toxic_batch_size = 5
+toxic_batch_size = 1 # so that we can just access the last sequence position without worrying about padding
 owt_batch_size = 5
 context_length = CONTEXT_LENGTH
 
-toxic_data_loader = retrieve_toxic_data(toxic_batch_size, context_length, tokenizer)
+toxic_data_loader = retrieve_toxic_data(toxic_batch_size, context_length, tokenizer, tokenize=False, num_points=100)
 # toxic_data_loader = retrieve_toxic_filtered_data(toxic_batch_size)
 owt_data_loader = retrieve_owt_data(owt_batch_size)
 
@@ -30,8 +30,8 @@ with open("data/gpt2_means.pkl", "rb") as f:
 
 # %%
 model = load_demo_gpt2(means=False)
-epochs_left = 200
-log_every = 100
+epochs_left = 70
+log_every = 10
 lr = .05 # free
 weight_decay = 0
 clamp_every = 50 # 5 # free
@@ -64,6 +64,7 @@ prev_params = None
 while epochs_left > 0:
     for e in tqdm(range(epochs_left)):
         for c, batch in enumerate(toxic_data_loader):
+            # print(batch["text"])
             total_preserving = 0
             ablated_edges = 0
             penalty = 0
@@ -77,7 +78,8 @@ while epochs_left > 0:
 
             # tox_loss = infer_batch(model, criterion, completions, toxic_batch_size, demos)
             # owt_loss = infer_batch(model, criterion, next(owt_iter)['tokens'], owt_batch_size, fixed_demos)
-            tox_loss, owt_loss = infer_batch_with_owt(model, criterion, batch, batch_text_to_tokens(next(owt_iter)), batch_size, demos)
+            tox_loss, owt_loss = infer_batch_with_owt(model, criterion, batch, next(owt_iter), batch_size, demos, access_toxic_pos=-1)
+            # print(f"{tox_loss=}, {owt_loss=}")
             loss = -1 * (penalty + alpha * tox_loss) + owt_loss
             loss.backward()
             optimizer.step()
@@ -86,6 +88,7 @@ while epochs_left > 0:
             num_ablated_edges.append(ablated_edges)
             for p in mask_params:
                 p.data.clamp_(0,1)
+        print(f"{loss.item()=}, {ablated_edges=}")
         epochs_trained += 1
         if epochs_trained % clamp_every == 0:
             ablated_edges = 0

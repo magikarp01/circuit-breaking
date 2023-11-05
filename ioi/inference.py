@@ -43,37 +43,64 @@ def infer_batch(model, criterion, batch, batch_size, demos, device=DEVICE, itemi
 
     return evaluate_sequence_loss(out, input, criterion, demos.shape[1], itemized=itemized)
 
-def infer_batch_with_owt(model, criterion, toxic_batch, owt_batch, batch_size, demos, device="cuda"):
+from transformers import GPT2Tokenizer
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+tokenizer.pad_token_id = tokenizer.eos_token_id
+def batch_text_to_tokens(x, tokenizer=tokenizer, ctx_length=50, pad_max=False):
+    return tokenizer(x['text'], max_length=ctx_length, padding='max_length' if pad_max else True, truncation=True, return_tensors='pt').input_ids.long()
+
+def infer_batch_with_owt(model, criterion, toxic_batch, owt_batch, batch_size, demos, device="cuda", access_toxic_pos=None):
     # encode the batch
     # toxic_batch = tokenizer(toxic_batch, return_tensors="pt", padding=True).input_ids.to(device)
+    losses = [0, 0]
+    for idx, batch in enumerate([toxic_batch, owt_batch]):
 
-    batch = torch.cat([toxic_batch.to(device), owt_batch.to(device)], dim=0)
-    # cast the entire batch tensor to torch.long
-    batch = batch.long()
+        # batch = torch.cat([toxic_batch.to(device), owt_batch.to(device)], dim=0)
+        # cast the entire batch tensor to torch.long
+        # batch = batch.long()
+        if idx == 0:
+            batch = batch_text_to_tokens(batch, pad_max=False)
+        else:
+            batch = batch_text_to_tokens(batch, pad_max=True)
 
-    # remove start token 
-    batch = batch[:, 1:]
-    
-    # concatenate the demos and the batch
-    # if batch size is < batch_size, remove some demos
+        # remove start token 
+        batch = batch[:, 1:].to(device)
+        
+        # concatenate the demos and the batch
+        # if batch size is < batch_size, remove some demos
 
-    if batch.shape[0] < batch_size:
-        demos = demos[:batch.shape[0]]
-    input = torch.cat([demos, batch], dim=1)
+        if batch.shape[0] < batch_size:
+            demos = demos[:batch.shape[0]]
+        # input = torch.cat([demos, batch], dim=1)
+        input = batch
 
-    # print(input.shape, input.dtype)
+        # print(input.shape, input.dtype)
 
-    # generate the output
-    out = model(input)[0]  # 0 is the logits
+        # generate the output
+        out = model(input)[0]  # 0 is the logits
 
-    return evaluate_sequence_loss(out[:toxic_batch.shape[0]], input[:toxic_batch.shape[0]], criterion, demos.shape[1]), evaluate_sequence_loss(out[toxic_batch.shape[0]:], batch[toxic_batch.shape[0]:], criterion, demos.shape[1])
+        # print(f"{out.shape=}, {demos.shape=}")
 
-def evaluate_sequence_loss(logits, batch, criterion, demo_len=0, itemized=False):
+        losses[idx] = evaluate_sequence_loss(out, input, criterion, demos.shape[1], access_seq_pos=access_toxic_pos if idx == 0 else None)
+    return (losses[0], losses[1])
+
+def evaluate_sequence_loss(logits, batch, criterion, demo_len=0, itemized=False, access_seq_pos=None):
+    """
+    If access_seq_pos is not None, then we only evaluate the loss for the token at that position. Else, it should be position of correct indirect object
+    """
     # get the logits for all tokens after the last demo
-    logits = logits[:, demo_len:-1]
+    if access_seq_pos is None:
+        logits = logits[:, demo_len:-1]
+    else:
+        logits = logits[:, access_seq_pos-1:access_seq_pos]
 
     # get the target labels by shifting the input batch to the left by one
-    target_labels = batch[:, demo_len+1:].long()
+    if access_seq_pos is None:
+        target_labels = batch[:, demo_len+1:].long()
+    else:
+        target_labels = batch[:, access_seq_pos].long()
+
+    # print(f"{logits.shape=}, {target_labels.shape=}")
 
     if itemized is False:
         logits = logits.flatten(0,1)

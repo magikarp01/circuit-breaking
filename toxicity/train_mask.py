@@ -62,8 +62,8 @@ edge_threshold = 100
 prev_params = None
 
 while epochs_left > 0:
-    for e in tqdm(range(epochs_left)):
-        for c, batch in enumerate(toxic_data_loader):
+    for e in range(epochs_left):
+        for c, batch in enumerate(tqdm(toxic_data_loader)):
             total_preserving = 0
             ablated_edges = 0
             penalty = 0

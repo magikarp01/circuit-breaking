@@ -9,6 +9,7 @@ from inference import generate_no_hf
 from detoxify import Detoxify
 from datasets import load_dataset
 from transformers import GPT2Tokenizer
+from torch.utils.data import Dataset
 
 
 # %%
@@ -39,29 +40,41 @@ with open('data/eval_uniform.pkl', 'rb') as f:
 # toxic_samples_train = [toxic_train[i][2] for i in range(min(len(toxic_train), TRAIN_SAMPLES))]
 # toxic_samples_test = [toxic_test[i][2] for i in range(min(len(toxic_test), TEST_SAMPLES))]
 
-def tokenize_and_concatenate_list(text_samples, tokenizer, seq_len):
-    full_text = "\n".join(text_samples)
-    # Divide into 20 chunks of ~ equal length
-    num_chunks = 20
-    chunk_length = (len(full_text)-1)//num_chunks + 1
-    chunks = [full_text[i*chunk_length:(i+1)*chunk_length] for i in range(num_chunks)]
-    # Tokenize the chunks in parallel. Uses NumPy because HuggingFace map doesn't want tensors returned
-    tokens = tokenizer(chunks, return_tensors='pt', padding=True)['input_ids'].flatten()
-    # Drop padding tokens
-    tokens = tokens[tokens != tokenizer.pad_token_id]
-    tokens = tokens[tokens != tokenizer.bos_token_id]
+def tokenize_and_concatenate_list(text_samples, tokenizer, seq_len, no_batch=True):
+    if no_batch: # tokenize each text sample independently and have variable length
+        all_tokens = []
+        for text in text_samples:
+            tokens = tokenizer(text, return_tensors='pt', padding=True)['input_ids'].long()
+            # Drop padding tokens
+            tokens = tokens[tokens != tokenizer.pad_token_id]
+            tokens = tokens[tokens != tokenizer.bos_token_id]
+            all_tokens.append(tokens)
+        return tokens
 
-    # make room for beginning of string token
-    seq_len -= 1
+    else:
+        full_text = "\n".join(text_samples)
+        # Divide into 20 chunks of ~ equal length
+        num_chunks = 20
+        chunk_length = (len(full_text)-1)//num_chunks + 1
+        chunks = [full_text[i*chunk_length:(i+1)*chunk_length] for i in range(num_chunks)]
+        # Tokenize the chunks in parallel. Uses NumPy because HuggingFace map doesn't want tensors returned
+        tokens = tokenizer(chunks, return_tensors='pt', padding=True)['input_ids'].flatten()
+        # Drop padding tokens
+        tokens = tokens[tokens != tokenizer.pad_token_id]
+        tokens = tokens[tokens != tokenizer.bos_token_id]
 
-    num_tokens = len(tokens)
-    num_batches = num_tokens//(seq_len)
-    # Drop the final tokens if not enough to make a full sequence
-    tokens = tokens[:seq_len*num_batches]
-    tokens = rearrange(tokens, '(batch seq) -> batch seq', batch=num_batches, seq=seq_len)
-    prefix = torch.full((num_batches, 1), tokenizer.bos_token_id)
-    tokens = torch.cat([prefix, tokens], axis=1)
-    return tokens
+        # make room for beginning of string token
+        seq_len -= 1
+
+        num_tokens = len(tokens)
+        num_batches = num_tokens//(seq_len)
+        # Drop the final tokens if not enough to make a full sequence
+        tokens = tokens[:seq_len*num_batches]
+        tokens = rearrange(tokens, '(batch seq) -> batch seq', batch=num_batches, seq=seq_len)
+        prefix = torch.full((num_batches, 1), tokenizer.bos_token_id)
+        tokens = torch.cat([prefix, tokens], axis=1)
+        return tokens
+
 
 def retrieve_toxic_filtered_data(batch_size, split="train"):
     with open(f"data/{split}_filtered_prompts.pkl", "rb") as f:
@@ -84,16 +97,40 @@ def retrieve_toxic_filtered_examples(tokenizer, split="train"):
         train_completions = pickle.load(f)
     print(tokenizer.batch_decode(torch.cat((train_prompts, train_completions), dim=1)))
 
-def retrieve_toxic_data(batch_size, ctx_length, tokenizer, from_saved=False, split="train"):
+
+class TextDataset(Dataset):
+    def __init__(self, text_data):
+        self.text_data = text_data
+
+    def __len__(self):
+        return len(self.text_data)
+
+    def __getitem__(self, idx):
+        return self.text_data[idx]
+
+def collate_fn(batch):
+    return {"text": batch}
+
+def retrieve_toxic_data(batch_size, ctx_length, tokenizer, from_saved=False, split="train", tokenize=True, num_points=None):
     
     if split == "train":
-        dataset = tokenize_and_concatenate_list(toxic_samples_train, tokenizer, ctx_length)
+        if tokenize:
+            dataset = tokenize_and_concatenate_list(toxic_samples_train, tokenizer, ctx_length)
+        else:
+            # dataset "text" index should be a list of strings 
+            dataset = TextDataset(toxic_samples_train)
     elif split == "test":
-        dataset = tokenize_and_concatenate_list(toxic_samples_test, tokenizer, ctx_length)
+        if tokenize:
+            dataset = tokenize_and_concatenate_list(toxic_samples_test, tokenizer, ctx_length)
+        else:
+            dataset = TextDataset(toxic_samples_test)
     else:
         raise ValueError("split must be either train or test")
     
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=split=="train")
+    if num_points is not None:
+        dataset = dataset[:num_points]
+    
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=split=="train", collate_fn=collate_fn)
     return loader
 
 def retrieve_toxic_train_val(batch_size, ctx_length, tokenizer, val_perc=0.2):
@@ -115,8 +152,8 @@ def retrieve_owt_data(batch_size, split="train"):
 
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 tokenizer.pad_token_id = tokenizer.eos_token_id
-def batch_text_to_tokens(x, tokenizer=tokenizer, ctx_length=50):
-    return tokenizer(x['text'], max_length=ctx_length, padding='max_length', truncation=True, return_tensors='pt').input_ids.long()
+def batch_text_to_tokens(x, tokenizer=tokenizer, ctx_length=50, pad_max=True):
+    return tokenizer(x['text'], max_length=ctx_length, padding='max_length' if pad_max else True, truncation=True, return_tensors='pt').input_ids.long()
 
 # %%
 
