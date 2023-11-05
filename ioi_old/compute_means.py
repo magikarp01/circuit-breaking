@@ -11,9 +11,9 @@ from tqdm import tqdm
 import torch
 
 # %%
-batch_size = 10
+batch_size = 50
 ctx_length = 50
-model = load_demo_gpt2(means=False)
+model = load_demo_gpt2()
 data_loader = retrieve_owt_data(batch_size)
 
 # %%
@@ -22,18 +22,8 @@ def compute_means(data_loader):
     means = []
     meta_means = []
     for c, batch in enumerate(tqdm(data_loader)):
-        # tokenize
-        texts = batch['text']
-        tokenized = tokenizer(texts, padding=True, truncation=True, max_length=ctx_length, return_tensors="pt").input_ids
-        # print(torch.stack(batch['tokens']).shape)
-        # torch.tensor(batch['tokens'])
-        # print(f"{torch.tensor(batch['tokens']).shape=}")
-        # print(f"{tokenized.shape=}")
-        # print(f"{batch['tokens']=}")
         with torch.no_grad():
-            # print(f"{model(tokenized.long(), return_states=True).shape=}")
-            means.append(model(tokenized.long(), return_states=True).mean(dim=[0,1],keepdim=True))
-            # means.append(model(batch['tokens'], return_states=True).mean(dim=[0,1],keepdim=True))
+            means.append(model(batch['tokens'].long(), return_states=True).mean(dim=[0,1],keepdim=True))
         if c % 50 == 0:
             meta_means.append(torch.stack(means, dim=0).mean(dim=0))
             means = []

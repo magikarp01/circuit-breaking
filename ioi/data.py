@@ -18,17 +18,26 @@ CONTEXT_LENGTH = 50
 FILTER_DEMO_LEN = 50
 FILTER_GENERATED_LEN = 30
 
-with open('data/train.pkl', 'rb') as f:
-    toxic_train = pickle.load(f)
+# with open('data/train.pkl', 'rb') as f:
+#     toxic_train = pickle.load(f)
 
-with open('data/test.pkl', 'rb') as f:
-    toxic_test = pickle.load(f)
+# with open('data/test.pkl', 'rb') as f:
+#     toxic_test = pickle.load(f)
+
+# with open('data/eval_uniform.pkl', 'rb') as f:
+#     eval_uniform = pickle.load(f)
+
+with open('data/ioi_sentences_train.pkl', 'rb') as f:
+    toxic_samples_train = pickle.load(f)
+
+with open('data/ioi_sentences_test.pkl', 'rb') as f:
+    toxic_samples_test = pickle.load(f)
 
 with open('data/eval_uniform.pkl', 'rb') as f:
     eval_uniform = pickle.load(f)
 
-toxic_samples_train = [toxic_train[i][2] for i in range(min(len(toxic_train), TRAIN_SAMPLES))]
-toxic_samples_test = [toxic_test[i][2] for i in range(min(len(toxic_test), TEST_SAMPLES))]
+# toxic_samples_train = [toxic_train[i][2] for i in range(min(len(toxic_train), TRAIN_SAMPLES))]
+# toxic_samples_test = [toxic_test[i][2] for i in range(min(len(toxic_test), TEST_SAMPLES))]
 
 def tokenize_and_concatenate_list(text_samples, tokenizer, seq_len):
     full_text = "\n".join(text_samples)

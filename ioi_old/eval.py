@@ -49,9 +49,7 @@ def evaluate_owt(model, owt_data_loader, demos=False, owt_batches=10):
     for c, batch in enumerate(owt_data_loader):
         if c > owt_batches:
             break
-        # batch = batch['tokens'].to(DEVICE)
-        batch = tokenizer(batch['text'], padding=True, truncation=True, max_length=50, return_tensors="pt").input_ids.to(DEVICE)
-
+        batch = batch['tokens'].to(DEVICE)
         if demos is not False:
             batch_demos = next(demos)[:owt_data_loader.batch_size].to(DEVICE)
         with torch.no_grad():
