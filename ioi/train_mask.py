@@ -30,7 +30,7 @@ with open("data/gpt2_means.pkl", "rb") as f:
 
 # %%
 model = load_demo_gpt2(means=False)
-epochs_left = 70
+epochs_left = 100
 log_every = 10
 lr = .05 # free
 weight_decay = 0
@@ -64,6 +64,7 @@ prev_params = None
 while epochs_left > 0:
     for e in tqdm(range(epochs_left)):
         for c, batch in enumerate(toxic_data_loader):
+            
             # print(batch["text"])
             total_preserving = 0
             ablated_edges = 0
@@ -104,8 +105,8 @@ while epochs_left > 0:
             print("Toxic loss: ", tox_loss.item())
             print("OWT loss: ", owt_loss.item())
             print("Penalty: ", penalty)
-            if input('evaluate? (y)') == 'y':
-                evaluate_model(model, toxic_batches=1, owt_batches=1)
+            # if input('evaluate? (y)') == 'y':
+            #     evaluate_model(model, toxic_batches=1, owt_batches=1)
             print("\n")
                 
         if epochs_trained > 50 and ablated_edges < edge_threshold:

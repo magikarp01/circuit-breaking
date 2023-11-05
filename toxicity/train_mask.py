@@ -30,8 +30,8 @@ with open("data/gpt2_means.pkl", "rb") as f:
 
 # %%
 model = load_demo_gpt2(means=False)
-epochs_left = 200
-log_every = 100
+epochs_left = 20
+log_every = 10
 lr = .05 # free
 weight_decay = 0
 clamp_every = 50 # 5 # free
@@ -54,6 +54,8 @@ demos = prepare_fixed_demo(tokenizer, batch_size, demo="")
 owt_iter = cycle(owt_data_loader)
 edge_threshold = 100
 
+max_steps_per_epoch = 100
+
 # with open("masked_gpt2_mean_ablation_v1.pkl", "rb") as f:
 #     model.load_state_dict(pickle.load(f)())
 
@@ -62,8 +64,10 @@ edge_threshold = 100
 prev_params = None
 
 while epochs_left > 0:
-    for e in range(epochs_left):
-        for c, batch in enumerate(tqdm(toxic_data_loader)):
+    for e in tqdm(range(epochs_left)):
+        for c, batch in enumerate(toxic_data_loader):
+            if c > max_steps_per_epoch:
+                break
             total_preserving = 0
             ablated_edges = 0
             penalty = 0
