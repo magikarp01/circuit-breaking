@@ -332,7 +332,11 @@ class DemoTransformer(nn.Module):
         if return_states:
             return residual
         
-        residual = einsum("batch position prev_head_idx d_model, prev_head_idx -> batch position d_model", residual, self.output_mask)
+        if self.frozen_mask:
+            output_mask = self.output_mask_baseline + self.output_mask_frozen * self.output_mask
+        else:
+            output_mask = self.output_mask
+        residual = einsum("batch position prev_head_idx d_model, prev_head_idx -> batch position d_model", residual, output_mask)
         normalized_resid_final = self.ln_final(residual)
         logits = self.unembed(normalized_resid_final)
         # logits have shape [batch, position, logits]

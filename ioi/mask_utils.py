@@ -77,7 +77,7 @@ def get_nodes_and_edges(mask_params, param_names=default_param_names, edge_0=Tru
             all_possible_nodes.append((layer, f"m{layer}"))
             mask_dict[f"m{layer}"] = mask_params[idx].detach().cpu()
     all_possible_nodes.append((n_heads, "output"))
-    mask_dict["output"] = mask_params[-1]
+    mask_dict["output"] = mask_params[0]
 
     # Calculate where edges are based on the mask
     # Edge between node i and node j if mask_dict[i][all_possible_nodes.index(j)] == 0

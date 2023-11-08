@@ -150,6 +150,16 @@ def retrieve_owt_data(batch_size, split="train"):
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     return data_loader
 
+def retrieve_ioi_data(batch_size, single_template=True, abc=False, split="train"):
+    with open(f"data/ioi_prompts" + ("_single_template" if single_template else "") + ("_abc" if abc else "") + f"_{split}.pkl", "rb") as f:
+        prompts = pickle.load(f)
+        sentences = [prompt['text'] for prompt in prompts]
+    
+    # Make a Dataset out of sentences with sentences in the "text" index
+    dataset = TextDataset(prompts)
+    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
+    return data_loader
+
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 tokenizer.pad_token_id = tokenizer.eos_token_id
 def batch_text_to_tokens(x, tokenizer=tokenizer, ctx_length=50, pad_max=True):
