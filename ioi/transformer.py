@@ -10,6 +10,7 @@ from fancy_einsum import einsum
 from dataclasses import dataclass
 import torch
 import torch.nn as nn
+import torch.nn as nn
 import numpy as np
 import math
 from easy_transformer.utils import gelu_new
@@ -29,6 +30,25 @@ class Config:
     n_layers: int = 12
 
 cfg = Config()
+
+class PartialFrozenMask(nn.Module):
+    def __init__(self, mask):
+        # Mask is a tensor of 1s and 0s that is the same shape as the parameter
+        # Freeze all 1s and leave all 0s active
+        super().__init__()
+        # Create the first frozen parameter
+        self.frozen_param1 = nn.Parameter(mask, requires_grad=False)
+        # Create the second frozen parameter
+        self.frozen_param2 = nn.Parameter(1 - mask, requires_grad=False)
+        # Create the active parameter
+        self.active_param = nn.Parameter(torch.ones_like(mask), requires_grad=True)
+
+        self.full_mask = self.frozen_param1 + self.frozen_param2 * self.active_param
+
+    def forward(self, x):
+        # return masked x
+        return x * self.full_mask
+
 
 class LayerNorm(nn.Module):
     def __init__(self, cfg):
@@ -170,7 +190,10 @@ class MLP(nn.Module):
 
 """## Transformer Block"""
 class TransformerBlock(nn.Module):
-    def __init__(self, cfg, prev_layers: int):
+    def __init__(self, cfg, prev_layers: int, mask_params_dict=None):
+        """
+        Mask_params_dict is a None or dictionary of the form: {'a': torch.tensor, 'm': torch.tensor}. Tells you what parts of mask to freeze.
+        """
         super().__init__()
         self.cfg = cfg
 
@@ -179,22 +202,42 @@ class TransformerBlock(nn.Module):
         self.ln2 = LayerNorm(cfg)
         self.mlp = MLP(cfg)
 
+        self.frozen_mask = True if mask_params_dict is not None else False
+
         for p in self.parameters():
             p.requires_grad = False
 
         prev_nodes = (cfg.n_heads + 1) * prev_layers + 1
         edge_mask_attentions_init = torch.ones((prev_nodes, cfg.n_heads))
         self.edge_mask_attentions = torch.nn.Parameter(edge_mask_attentions_init, requires_grad=True)
+        
+        if self.frozen_mask:
+            self.edge_mask_attentions_baseline = torch.nn.Parameter(mask_params_dict['a'], requires_grad=False)
+            self.edge_mask_attentions_frozen = torch.nn.Parameter(1 - mask_params_dict['a'], requires_grad=False)
+        # if mask_params is not None:
+        #     self.frozen_edge_mask_attentions = PartialFrozenMask(mask_params)
+        # else:
+        #     self.frozen_edge_mask_attentions = None
 
         edge_mask_mlp_init = torch.ones((prev_nodes + cfg.n_heads, ))
         self.edge_mask_mlp = torch.nn.Parameter(edge_mask_mlp_init, requires_grad=True)
+        
+        if self.frozen_mask:
+            self.edge_mask_mlp_baseline = torch.nn.Parameter(mask_params_dict['m'], requires_grad=False)
+            self.edge_mask_mlp_frozen = torch.nn.Parameter(1 - mask_params_dict['m'], requires_grad=False)
 
     def forward(self, resid_pre, means=False):
 
+        if self.frozen_mask:
+            attn_mask = self.edge_mask_attentions_baseline + self.edge_mask_attentions_frozen * self.edge_mask_attentions
+        else:
+            attn_mask = self.edge_mask_attentions
+        
         # resid_pre [batch, position, d_model, prev_head_idx]
-        masked_residuals = einsum("batch position prev_head_idx d_model, prev_head_idx n_heads -> batch position n_heads d_model", resid_pre, self.edge_mask_attentions)
+        masked_residuals = einsum("batch position prev_head_idx d_model, prev_head_idx n_heads -> batch position n_heads d_model", resid_pre, attn_mask)
+
         if isinstance(means, torch.Tensor):
-            masked_means = einsum("prev_head_idx d_model, prev_head_idx n_heads -> n_heads d_model", means[:self.edge_mask_attentions.shape[0]], 1 - self.edge_mask_attentions)
+            masked_means = einsum("prev_head_idx d_model, prev_head_idx n_heads -> n_heads d_model", means[:self.edge_mask_attentions.shape[0]], 1 - attn_mask)
             masked_residuals = masked_residuals + masked_means
 
         # print(self.edge_mask_attentions)
@@ -209,8 +252,12 @@ class TransformerBlock(nn.Module):
         # self.saved_output = attn_out
 
         residual = torch.cat((resid_pre, attn_out), dim=2)
+        if self.frozen_mask:
+            mlp_mask = self.edge_mask_mlp_baseline + self.edge_mask_mlp_frozen * self.edge_mask_mlp
+        else:
+            mlp_mask = self.edge_mask_mlp
 
-        masked_mlp_residual = einsum("batch position prev_head_idx d_model, prev_head_idx -> batch position d_model", residual, self.edge_mask_mlp)
+        masked_mlp_residual = einsum("batch position prev_head_idx d_model, prev_head_idx -> batch position d_model", residual, mlp_mask)
         
         normalized_resid_mid = self.ln2(masked_mlp_residual)
         mlp_out = self.mlp(normalized_resid_mid)
@@ -238,8 +285,14 @@ class Unembed(nn.Module):
 
 """## Full Transformer"""
 
+
+def get_mask_dict(layer, n_heads, mask_dict_superset=None):
+    attn_mask = torch.stack([mask_dict_superset[f'a{layer}.{h}'] for h in range(n_heads)], dim=1)
+    mlp_mask = mask_dict_superset[f'm{layer}']
+    return {'a': attn_mask, 'm': mlp_mask}
+
 class DemoTransformer(nn.Module):
-    def __init__(self, cfg, means):
+    def __init__(self, cfg, means, mask_dict_superset=None):
         super().__init__()
         self.cfg = cfg
         self.embed = Embed(cfg)
@@ -248,10 +301,17 @@ class DemoTransformer(nn.Module):
         self.unembed = Unembed(cfg)
         for p in self.parameters():
             p.requires_grad = False
-
-        self.blocks = nn.ModuleList([TransformerBlock(cfg, i) for i in range(cfg.n_layers)])
+        self.blocks = nn.ModuleList([TransformerBlock(cfg, i, 
+                                                      mask_params_dict=get_mask_dict(i, cfg.n_heads, mask_dict_superset) if mask_dict_superset is not None else None) 
+                                                      for i in range(cfg.n_layers)])
         total_nodes = (cfg.n_heads + 1) * cfg.n_layers + 1
         self.output_mask = torch.nn.Parameter(torch.ones((total_nodes,)), requires_grad=True)
+
+        self.frozen_mask = True if mask_dict_superset is not None else False
+        if self.frozen_mask:
+            self.output_mask_baseline = torch.nn.Parameter(mask_dict_superset['output'], requires_grad=False)
+            self.output_mask_frozen = torch.nn.Parameter(1 - mask_dict_superset['output'], requires_grad=False)
+
         self.means = means
     
     def forward(self, tokens, return_states=False):
