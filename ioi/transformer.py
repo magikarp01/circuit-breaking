@@ -237,8 +237,13 @@ class TransformerBlock(nn.Module):
         masked_residuals = einsum("batch position prev_head_idx d_model, prev_head_idx n_heads -> batch position n_heads d_model", resid_pre, attn_mask)
 
         if isinstance(means, torch.Tensor):
-            masked_means = einsum("prev_head_idx d_model, prev_head_idx n_heads -> n_heads d_model", means[:self.edge_mask_attentions.shape[0]], 1 - attn_mask)
-            masked_residuals = masked_residuals + masked_means
+            masked_means = einsum("seq_len prev_head_idx d_model, prev_head_idx n_heads -> seq_len n_heads d_model", means[:, :self.edge_mask_attentions.shape[0]], 1 - attn_mask)
+            if masked_means.shape[0] > masked_residuals.shape[1]:
+                masked_residuals = masked_residuals + masked_means[:masked_residuals.shape[1]].unsqueeze(0)
+            else:
+                assert masked_means.shape[0] == 1
+                masked_residuals = masked_residuals + masked_means # should broadcast
+
 
         # print(self.edge_mask_attentions)
         # torch.sum(masked_residuals, dim=2, keepdim=True)
