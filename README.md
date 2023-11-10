@@ -16,3 +16,8 @@ For the `mnist` setting, look in the `mnist` folder:
 - The `data` folder has the `MNIST` images to train on
 - The `mlp_model.py` file defines the architecture we use for these experiments
 - `old.py` has an old version of `main.py`
+
+
+Generate IOI data in make_ioi_datasets.ipynb.
+Run compute_means.py for specific or set means=False for zero ablation.
+Train masks in train_ioi_mask.ipynb or alternative_masks.ipynb.1
