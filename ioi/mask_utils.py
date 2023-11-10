@@ -53,6 +53,7 @@ def reset_mask(model):
 def get_nodes_and_edges(mask_params, param_names=default_param_names, edge_0=True):
     """
     If edge_0 is True, then edges are between nodes with mask value 0. Else, edges are between nodes with mask value 1.
+    Returns all_possible_nodes, nodes_with_edges, edges, mask_dict
     """
     # calculate which nodes will be in the graph
     connected_nodes = set()
