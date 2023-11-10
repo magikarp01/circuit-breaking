@@ -180,8 +180,11 @@ def retrieve_ioi_data(batch_size, template_type="single", abc=False, split="trai
 
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 tokenizer.pad_token_id = tokenizer.eos_token_id
-def batch_text_to_tokens(x, tokenizer=tokenizer, ctx_length=50, pad_max=True):
-    return tokenizer(x['text'], max_length=ctx_length, padding='max_length' if pad_max else True, truncation=True, return_tensors='pt').input_ids.long()
+def batch_text_to_tokens(x, tokenizer=tokenizer, ctx_length=50, pad_max=False):
+    if ctx_length is None:
+        return tokenizer(x['text'], padding='max_length' if pad_max else True, truncation=True, return_tensors='pt').input_ids.long()
+    else:
+        return tokenizer(x['text'], max_length=ctx_length, padding='max_length' if pad_max else True, truncation=True, return_tensors='pt').input_ids.long()
 
 # %%
 

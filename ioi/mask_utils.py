@@ -122,7 +122,8 @@ def get_node_name(node_name, show_full_index=False):
             # return name
 
         elif "embed" in node_name:
-            name = "pos_embeds" if "pos" in node_name else "token_embeds"
+            # name = "pos_embeds" if "pos" in node_name else "token_embeds"
+            name = "embed"
             layer = -1
 
         # Handle q_input and hook_q etc
@@ -149,7 +150,7 @@ def get_node_name(node_name, show_full_index=False):
 
         # Handle resid_post
         elif "resid_post" in node_name:
-            name += "resid_post"
+            name += "output"
             layer = 12
 
         # elif "mlp" in node_name:
