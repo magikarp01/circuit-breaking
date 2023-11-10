@@ -108,25 +108,43 @@ class TextDataset(Dataset):
     def __getitem__(self, idx):
         return self.text_data[idx]
 
+class PromptDataset(Dataset):
+    def __init__(self, prompt_list):
+        self.prompt_list = prompt_list
+
+    def __len__(self):
+        return len(self.prompt_list)
+
+    def __getitem__(self, idx):
+        data = self.prompt_list[idx]
+        # Extract and return each item individually
+        return data['text']
+
+
 def collate_fn(batch):
     return {"text": batch}
 
-def retrieve_toxic_data(batch_size, ctx_length, tokenizer, from_saved=False, split="train", tokenize=True, num_points=None):
+
+
+def retrieve_toxic_data(batch_size, ctx_length, tokenizer, from_saved=True, split="train", tokenize=False, num_points=None, template_type="single"):
+    """
+    template_type can be "single", "double", or None
+    """
+
+    toxic_samples = toxic_samples_train if split == "train" else toxic_samples_test
     
-    if split == "train":
-        if tokenize:
-            dataset = tokenize_and_concatenate_list(toxic_samples_train, tokenizer, ctx_length)
-        else:
-            # dataset "text" index should be a list of strings 
-            dataset = TextDataset(toxic_samples_train)
-    elif split == "test":
-        if tokenize:
-            dataset = tokenize_and_concatenate_list(toxic_samples_test, tokenizer, ctx_length)
-        else:
-            dataset = TextDataset(toxic_samples_test)
+    if from_saved:
+        with open(f"data/ioi_prompts" + ("_single_template" if template_type=="single" else "_double_template" if template_type=="double" else "") + f"_{split}.pkl", "rb") as f:
+            prompts = pickle.load(f)
+        # Make a Dataset out of sentences with sentences in the "text" index
+        dataset = PromptDataset(prompts)
+
+    elif tokenize:
+        dataset = tokenize_and_concatenate_list(toxic_samples, tokenizer, ctx_length)
     else:
-        raise ValueError("split must be either train or test")
-    
+        # dataset "text" index should be a list of strings 
+        dataset = TextDataset(toxic_samples)
+
     if num_points is not None:
         dataset = dataset[:num_points]
     
@@ -150,8 +168,8 @@ def retrieve_owt_data(batch_size, split="train"):
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     return data_loader
 
-def retrieve_ioi_data(batch_size, single_template=True, abc=False, split="train"):
-    with open(f"data/ioi_prompts" + ("_single_template" if single_template else "") + ("_abc" if abc else "") + f"_{split}.pkl", "rb") as f:
+def retrieve_ioi_data(batch_size, template_type="single", abc=False, split="train"):
+    with open(f"data/ioi_prompts" + ("_single_template" if template_type=="single" else "_double_template" if template_type=="double" else "") + ("_abc" if abc else "") + f"_{split}.pkl", "rb") as f:
         prompts = pickle.load(f)
         sentences = [prompt['text'] for prompt in prompts]
     

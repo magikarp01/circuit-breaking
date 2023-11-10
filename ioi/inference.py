@@ -62,7 +62,6 @@ def infer_batch_with_owt(model, criterion, toxic_batch, owt_batch, batch_size, d
             batch = batch_text_to_tokens(batch, pad_max=False)
         else:
             batch = batch_text_to_tokens(batch, pad_max=True)
-
         # remove start token 
         batch = batch[:, 1:].to(device)
         
@@ -101,6 +100,8 @@ def evaluate_sequence_loss(logits, batch, criterion, demo_len=0, itemized=False,
         target_labels = batch[:, access_seq_pos].long()
 
     # print(f"{logits.shape=}, {target_labels.shape=}")
+    # print(f"logit_shape: {logits.shape}, target labels: {tokenizer.batch_decode(target_labels)}")
+    # print(f"Sentence: {tokenizer.batch_decode(batch)}")
 
     if itemized is False:
         logits = logits.flatten(0,1)

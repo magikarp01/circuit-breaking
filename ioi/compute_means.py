@@ -11,11 +11,12 @@ from tqdm import tqdm
 import torch
 
 # %%
+template_type = "double"
 batch_size = 10
 # ctx_length = 50
 model = load_demo_gpt2(means=False)
 # data_loader = retrieve_owt_data(batch_size)
-data_loader = retrieve_ioi_data(batch_size, single_template=True, abc=True, split="train")
+data_loader = retrieve_ioi_data(batch_size, template_type=template_type, abc=True, split="train")
 
 # %%
 
@@ -31,6 +32,7 @@ def compute_means(data_loader):
         # print(f"{torch.tensor(batch['tokens']).shape=}")
         # print(f"{tokenized.shape=}")
         # print(f"{batch['tokens']=}")
+        print(batch)
         with torch.no_grad():
             # print(f"{model(tokenized.long(), return_states=True).shape=}")
             # means.append(model(tokenized.long(), return_states=True).mean(dim=[0,1],keepdim=True))
@@ -48,7 +50,7 @@ means = compute_means(data_loader)
 # %%
 
 import pickle 
-with open('data/gpt2_ioi_abc_means.pkl', 'wb') as f:
+with open(f'data/gpt2_{template_type}_ioi_abc_means.pkl', 'wb') as f:
     pickle.dump(means, f)
 
 # %%

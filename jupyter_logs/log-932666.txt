@@ -1,0 +1,1 @@
+/var/spool/slurmd/job932666/slurm_script: line 12: jupyter-notebook: command not found

@@ -1,0 +1,145 @@
+[I 2023-11-10 04:23:08.914 ServerApp] Package notebook took 0.0000s to import
+[I 2023-11-10 04:23:09.097 ServerApp] Package jupyter_lsp took 0.1827s to import
+[W 2023-11-10 04:23:09.098 ServerApp] A `_jupyter_server_extension_points` function was not found in jupyter_lsp. Instead, a `_jupyter_server_extension_paths` function was found and will be used for now. This function name will be deprecated in future releases of Jupyter Server.
+[I 2023-11-10 04:23:09.186 ServerApp] Package jupyter_server_terminals took 0.0886s to import
+[I 2023-11-10 04:23:09.187 ServerApp] Package jupyterlab took 0.0000s to import
+[I 2023-11-10 04:23:09.604 ServerApp] Package notebook_shim took 0.0000s to import
+[W 2023-11-10 04:23:09.604 ServerApp] A `_jupyter_server_extension_points` function was not found in notebook_shim. Instead, a `_jupyter_server_extension_paths` function was found and will be used for now. This function name will be deprecated in future releases of Jupyter Server.
+[I 2023-11-10 04:23:09.611 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2023-11-10 04:23:09.625 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[W 2023-11-10 04:23:09.627 ServerApp] jupyterlab | error linking extension: Trait, kernel_name, not found.
+    Traceback (most recent call last):
+      File "/data/phillip_guo/miniconda3/envs/unlrn/lib/python3.10/site-packages/jupyter_server/extension/manager.py", line 344, in link_extension
+        extension.link_all_points(self.serverapp)
+      File "/data/phillip_guo/miniconda3/envs/unlrn/lib/python3.10/site-packages/jupyter_server/extension/manager.py", line 226, in link_all_points
+        self.link_point(point_name, serverapp)
+      File "/data/phillip_guo/miniconda3/envs/unlrn/lib/python3.10/site-packages/jupyter_server/extension/manager.py", line 216, in link_point
+        point.link(serverapp)
+      File "/data/phillip_guo/miniconda3/envs/unlrn/lib/python3.10/site-packages/jupyter_server/extension/manager.py", line 138, in link
+        linker(serverapp)
+      File "/data/phillip_guo/miniconda3/envs/unlrn/lib/python3.10/site-packages/jupyter_server/extension/application.py", line 406, in _link_jupyter_server_extension
+        self.update_config(self.serverapp.config)
+      File "/data/phillip_guo/miniconda3/envs/unlrn/lib/python3.10/site-packages/notebook_shim/shim.py", line 141, in update_config
+        shimmed_config = self.shim_config_from_notebook_to_jupyter_server(
+      File "/data/phillip_guo/miniconda3/envs/unlrn/lib/python3.10/site-packages/notebook_shim/shim.py", line 232, in shim_config_from_notebook_to_jupyter_server
+        raise TraitError("Trait, {}, not found.".format(trait_name))
+    traitlets.traitlets.TraitError: Trait, kernel_name, not found.
+[I 2023-11-10 04:23:09.638 ServerApp] notebook | extension was successfully linked.
+[I 2023-11-10 04:23:10.312 ServerApp] notebook_shim | extension was successfully linked.
+[I 2023-11-10 04:23:10.345 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2023-11-10 04:23:10.346 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2023-11-10 04:23:10.348 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2023-11-10 04:23:10.353 LabApp] JupyterLab extension loaded from /data/phillip_guo/miniconda3/envs/unlrn/lib/python3.10/site-packages/jupyterlab
+[I 2023-11-10 04:23:10.353 LabApp] JupyterLab application directory is /data/phillip_guo/miniconda3/envs/unlrn/share/jupyter/lab
+[I 2023-11-10 04:23:10.354 LabApp] Extension Manager is 'pypi'.
+[I 2023-11-10 04:23:10.356 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2023-11-10 04:23:10.360 ServerApp] notebook | extension was successfully loaded.
+[I 2023-11-10 04:23:10.361 ServerApp] Serving notebooks from local directory: /data/phillip_guo/circuit-breaking
+[I 2023-11-10 04:23:10.361 ServerApp] Jupyter Server 2.10.0 is running at:
+[I 2023-11-10 04:23:10.361 ServerApp] http://compute-permanent-node-891:8888/tree?token=34d45118bd656fe424097229e42ed108ef61511aa26cc052
+[I 2023-11-10 04:23:10.361 ServerApp]     http://127.0.0.1:8888/tree?token=34d45118bd656fe424097229e42ed108ef61511aa26cc052
+[I 2023-11-10 04:23:10.361 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2023-11-10 04:23:10.365 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///data/phillip_guo/.local/share/jupyter/runtime/jpserver-201961-open.html
+    Or copy and paste one of these URLs:
+        http://compute-permanent-node-891:8888/tree?token=34d45118bd656fe424097229e42ed108ef61511aa26cc052
+        http://127.0.0.1:8888/tree?token=34d45118bd656fe424097229e42ed108ef61511aa26cc052
+[I 2023-11-10 04:23:10.413 ServerApp] Skipped non-installed server(s): bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[W 2023-11-10 04:54:17.333 ServerApp] 404 GET /hub/api (@172.16.0.238) 123.24ms referer=None
+[I 2023-11-10 04:54:17.340 JupyterNotebookApp] 302 GET /tree? (@172.16.0.238) 0.46ms
+[W 2023-11-10 04:54:19.349 ServerApp] 404 GET /hub/api (@172.16.0.238) 60.99ms referer=None
+[I 2023-11-10 04:54:19.356 JupyterNotebookApp] 302 GET /tree? (@172.16.0.238) 0.46ms
+[I 2023-11-10 05:20:05.340 ServerApp] Kernel started: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 05:20:07.260 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[W 2023-11-10 05:20:08.027 ServerApp] 404 GET /nbextensions/jupyter-js-widgets/extension.js (@172.16.0.238) 8.57ms referer=None
+[I 2023-11-10 05:23:19.624 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 05:23:19.629 ServerApp] Starting buffering for 51ada587-a24c-49b1-b31d-d8270c665a75:10dd880c-b2aa-4ab6-a68d-922967230b2b
+[I 2023-11-10 05:23:19.634 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 05:23:19.635 ServerApp] Restoring connection for 51ada587-a24c-49b1-b31d-d8270c665a75:10dd880c-b2aa-4ab6-a68d-922967230b2b
+[I 2023-11-10 05:23:47.663 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 05:23:47.666 ServerApp] Starting buffering for 51ada587-a24c-49b1-b31d-d8270c665a75:10dd880c-b2aa-4ab6-a68d-922967230b2b
+[I 2023-11-10 05:23:47.670 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 05:23:47.670 ServerApp] Restoring connection for 51ada587-a24c-49b1-b31d-d8270c665a75:10dd880c-b2aa-4ab6-a68d-922967230b2b
+[I 2023-11-10 05:45:07.551 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 05:45:07.553 ServerApp] Starting buffering for 51ada587-a24c-49b1-b31d-d8270c665a75:10dd880c-b2aa-4ab6-a68d-922967230b2b
+[I 2023-11-10 05:45:07.559 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 05:45:07.559 ServerApp] Restoring connection for 51ada587-a24c-49b1-b31d-d8270c665a75:10dd880c-b2aa-4ab6-a68d-922967230b2b
+[I 2023-11-10 05:45:41.851 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 05:45:41.854 ServerApp] Starting buffering for 51ada587-a24c-49b1-b31d-d8270c665a75:10dd880c-b2aa-4ab6-a68d-922967230b2b
+[I 2023-11-10 05:45:41.859 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 05:45:41.859 ServerApp] Restoring connection for 51ada587-a24c-49b1-b31d-d8270c665a75:10dd880c-b2aa-4ab6-a68d-922967230b2b
+[I 2023-11-10 06:00:02.401 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 06:00:02.404 ServerApp] Starting buffering for 51ada587-a24c-49b1-b31d-d8270c665a75:10dd880c-b2aa-4ab6-a68d-922967230b2b
+[I 2023-11-10 06:00:02.409 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 06:00:02.409 ServerApp] Restoring connection for 51ada587-a24c-49b1-b31d-d8270c665a75:10dd880c-b2aa-4ab6-a68d-922967230b2b
+[I 2023-11-10 06:00:37.065 ServerApp] Starting buffering for 51ada587-a24c-49b1-b31d-d8270c665a75:10dd880c-b2aa-4ab6-a68d-922967230b2b
+[I 2023-11-10 06:00:42.047 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[W 2023-11-10 06:00:42.867 ServerApp] 404 GET /nbextensions/jupyter-js-widgets/extension.js (@172.16.0.238) 3.20ms referer=None
+[W 2023-11-10 06:00:42.868 ServerApp] 404 GET /nbextensions/jupyterlab-plotly/extension.js (@172.16.0.238) 3.92ms referer=None
+[I 2023-11-10 06:23:22.078 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[W 2023-11-10 06:23:22.993 ServerApp] 404 GET /nbextensions/jupyter-js-widgets/extension.js (@172.16.0.238) 9.06ms referer=None
+[W 2023-11-10 06:23:22.993 ServerApp] 404 GET /nbextensions/jupyterlab-plotly/extension.js (@172.16.0.238) 9.40ms referer=None
+[I 2023-11-10 06:30:37.722 ServerApp] Kernel interrupted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 06:31:15.614 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 06:31:15.623 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 06:33:15.884 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 06:33:15.893 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 07:01:30.854 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 07:01:30.863 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 07:02:41.417 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 07:02:41.426 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 07:03:54.026 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 07:03:54.040 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 07:10:49.542 ServerApp] Kernel interrupted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 07:14:37.068 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 07:14:37.075 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 07:14:56.261 ServerApp] Kernel interrupted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 07:15:37.119 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 07:15:37.126 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 07:23:19.565 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 07:23:37.925 ServerApp] Kernel started: c3c77208-866f-4a9b-b83d-748dbe18dc18
+[I 2023-11-10 07:23:38.611 ServerApp] Connecting to kernel c3c77208-866f-4a9b-b83d-748dbe18dc18.
+[W 2023-11-10 07:23:45.410 ServerApp] 404 GET /nbextensions/jupyter-js-widgets/extension.js (@172.16.0.238) 1.58ms referer=None
+[W 2023-11-10 07:23:45.410 ServerApp] 404 GET /nbextensions/jupyterlab-plotly/extension.js (@172.16.0.238) 1.90ms referer=None
+[I 2023-11-10 07:39:35.524 ServerApp] Kernel restarted: c3c77208-866f-4a9b-b83d-748dbe18dc18
+[I 2023-11-10 07:39:35.527 ServerApp] Starting buffering for c3c77208-866f-4a9b-b83d-748dbe18dc18:f0a780c0-c268-4fab-b662-93302b73cb0e
+[I 2023-11-10 07:39:35.532 ServerApp] Connecting to kernel c3c77208-866f-4a9b-b83d-748dbe18dc18.
+[I 2023-11-10 07:39:35.533 ServerApp] Restoring connection for c3c77208-866f-4a9b-b83d-748dbe18dc18:f0a780c0-c268-4fab-b662-93302b73cb0e
+[I 2023-11-10 07:40:27.866 ServerApp] Kernel restarted: c3c77208-866f-4a9b-b83d-748dbe18dc18
+[I 2023-11-10 07:40:27.867 ServerApp] Starting buffering for c3c77208-866f-4a9b-b83d-748dbe18dc18:f0a780c0-c268-4fab-b662-93302b73cb0e
+[I 2023-11-10 07:40:27.873 ServerApp] Connecting to kernel c3c77208-866f-4a9b-b83d-748dbe18dc18.
+[I 2023-11-10 07:40:27.873 ServerApp] Restoring connection for c3c77208-866f-4a9b-b83d-748dbe18dc18:f0a780c0-c268-4fab-b662-93302b73cb0e
+[I 2023-11-10 07:43:05.074 ServerApp] Kernel interrupted: c3c77208-866f-4a9b-b83d-748dbe18dc18
+[I 2023-11-10 07:43:51.864 ServerApp] Kernel interrupted: c3c77208-866f-4a9b-b83d-748dbe18dc18
+[I 2023-11-10 07:54:50.589 ServerApp] Kernel interrupted: c3c77208-866f-4a9b-b83d-748dbe18dc18
+[I 2023-11-10 08:00:33.469 ServerApp] Kernel interrupted: c3c77208-866f-4a9b-b83d-748dbe18dc18
+[I 2023-11-10 08:05:11.022 ServerApp] Kernel restarted: c3c77208-866f-4a9b-b83d-748dbe18dc18
+[I 2023-11-10 08:05:11.025 ServerApp] Starting buffering for c3c77208-866f-4a9b-b83d-748dbe18dc18:f0a780c0-c268-4fab-b662-93302b73cb0e
+[I 2023-11-10 08:05:11.030 ServerApp] Connecting to kernel c3c77208-866f-4a9b-b83d-748dbe18dc18.
+[I 2023-11-10 08:05:11.030 ServerApp] Restoring connection for c3c77208-866f-4a9b-b83d-748dbe18dc18:f0a780c0-c268-4fab-b662-93302b73cb0e
+[I 2023-11-10 08:16:38.534 ServerApp] Kernel interrupted: c3c77208-866f-4a9b-b83d-748dbe18dc18
+[I 2023-11-10 08:17:37.703 ServerApp] Kernel restarted: c3c77208-866f-4a9b-b83d-748dbe18dc18
+[I 2023-11-10 08:17:37.705 ServerApp] Starting buffering for c3c77208-866f-4a9b-b83d-748dbe18dc18:f0a780c0-c268-4fab-b662-93302b73cb0e
+[I 2023-11-10 08:17:37.709 ServerApp] Connecting to kernel c3c77208-866f-4a9b-b83d-748dbe18dc18.
+[I 2023-11-10 08:17:37.709 ServerApp] Restoring connection for c3c77208-866f-4a9b-b83d-748dbe18dc18:f0a780c0-c268-4fab-b662-93302b73cb0e
+[I 2023-11-10 08:47:09.529 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[W 2023-11-10 08:47:10.992 ServerApp] 404 GET /nbextensions/jupyter-js-widgets/extension.js (@172.16.0.238) 2.31ms referer=None
+[W 2023-11-10 08:47:10.993 ServerApp] 404 GET /nbextensions/jupyterlab-plotly/extension.js (@172.16.0.238) 2.51ms referer=None
+[I 2023-11-10 09:03:24.595 ServerApp] Kernel started: c5571186-2dd8-42c4-b802-21a9b3b3ff9b
+[I 2023-11-10 09:03:25.661 ServerApp] Connecting to kernel c5571186-2dd8-42c4-b802-21a9b3b3ff9b.
+[I 2023-11-10 09:04:20.634 ServerApp] Kernel interrupted: c5571186-2dd8-42c4-b802-21a9b3b3ff9b
+[I 2023-11-10 09:04:45.712 ServerApp] Kernel shutdown: c5571186-2dd8-42c4-b802-21a9b3b3ff9b
+[I 2023-11-10 09:04:46.702 ServerApp] Starting buffering for c5571186-2dd8-42c4-b802-21a9b3b3ff9b:fe85c7ed-7cca-4d99-9c50-507a353091f8
+[I 2023-11-10 09:08:49.951 ServerApp] Kernel restarted: c3c77208-866f-4a9b-b83d-748dbe18dc18
+[I 2023-11-10 09:08:49.954 ServerApp] Starting buffering for c3c77208-866f-4a9b-b83d-748dbe18dc18:f0a780c0-c268-4fab-b662-93302b73cb0e
+[I 2023-11-10 09:08:49.959 ServerApp] Connecting to kernel c3c77208-866f-4a9b-b83d-748dbe18dc18.
+[I 2023-11-10 09:08:49.959 ServerApp] Restoring connection for c3c77208-866f-4a9b-b83d-748dbe18dc18:f0a780c0-c268-4fab-b662-93302b73cb0e
+[I 2023-11-10 09:10:13.319 ServerApp] Starting buffering for c3c77208-866f-4a9b-b83d-748dbe18dc18:f0a780c0-c268-4fab-b662-93302b73cb0e
+[I 2023-11-10 09:10:15.319 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 09:12:02.572 ServerApp] Kernel interrupted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 09:13:22.824 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 09:13:22.831 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
+[I 2023-11-10 09:20:00.244 ServerApp] Kernel restarted: 51ada587-a24c-49b1-b31d-d8270c665a75
+[I 2023-11-10 09:20:00.251 ServerApp] Connecting to kernel 51ada587-a24c-49b1-b31d-d8270c665a75.
