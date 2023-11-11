@@ -37,7 +37,7 @@ def compute_means(data_loader):
             # print(f"{model(tokenized.long(), return_states=True).shape=}")
             # means.append(model(tokenized.long(), return_states=True).mean(dim=[0,1],keepdim=True))
             # means.append(model(batch_text_to_tokens(batch), return_states=True).mean(dim=[0,1],keepdim=True))
-            means.append(model(batch_text_to_tokens(batch, ctx_length=None), return_states=True).mean(dim=[0],keepdim=True))
+            means.append(model(batch_text_to_tokens(batch, ctx_length=50, pad_max=True), return_states=True).mean(dim=[0],keepdim=True))
             # print(batch_text_to_tokens(batch, ctx_length=None).shape)
         if c % 50 == 0:
             meta_means.append(torch.stack(means, dim=0).mean(dim=0))

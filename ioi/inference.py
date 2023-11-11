@@ -47,7 +47,10 @@ from transformers import GPT2Tokenizer
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 tokenizer.pad_token_id = tokenizer.eos_token_id
 def batch_text_to_tokens(x, tokenizer=tokenizer, ctx_length=50, pad_max=False):
-    return tokenizer(x['text'], max_length=ctx_length, padding='max_length' if pad_max else True, truncation=True, return_tensors='pt').input_ids.long()
+    if ctx_length is None:
+        return tokenizer(x['text'], padding='max_length' if pad_max else True, truncation=True, return_tensors='pt').input_ids.long()
+    else:
+        return tokenizer(x['text'], max_length=ctx_length, padding='max_length' if pad_max else True, truncation=True, return_tensors='pt').input_ids.long()
 
 def infer_batch_with_owt(model, criterion, toxic_batch, owt_batch, batch_size, demos, device="cuda", access_toxic_pos=None):
     # encode the batch
@@ -59,9 +62,9 @@ def infer_batch_with_owt(model, criterion, toxic_batch, owt_batch, batch_size, d
         # cast the entire batch tensor to torch.long
         # batch = batch.long()
         if idx == 0:
-            batch = batch_text_to_tokens(batch, pad_max=False)
+            batch = batch_text_to_tokens(batch, pad_max=False, ctx_length=None)
         else:
-            batch = batch_text_to_tokens(batch, pad_max=True)
+            batch = batch_text_to_tokens(batch, pad_max=True, ctx_length=50)
         # remove start token 
         batch = batch[:, 1:].to(device)
         

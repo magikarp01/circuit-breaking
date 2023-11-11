@@ -241,7 +241,8 @@ class TransformerBlock(nn.Module):
             if masked_means.shape[0] > masked_residuals.shape[1]:
                 masked_residuals = masked_residuals + masked_means[:masked_residuals.shape[1]].unsqueeze(0)
             else:
-                print("WARNING: masked_means.shape[0] < masked_residuals.shape[1]")
+                # print("WARNING: masked_means.shape[0] < masked_residuals.shape[1]")
+                # print("masked_means.shape[0]", masked_means.shape[0], "masked_residuals.shape[1]", masked_residuals.shape[1])
                 assert masked_means.shape[0] == 1
                 masked_residuals = masked_residuals + masked_means # should broadcast
 
